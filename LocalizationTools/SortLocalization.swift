@@ -60,13 +60,14 @@ struct KeyValue: Hashable {
         let correctEnding = value.last == ";"
         
         // 2. Rule: There should be only two or zero quotation marks
-        let quotationRule1 = (key.count(of: "\"") == 2 || key.count(of: "\"") == 0)
-        let quotationRule2 = (key.count(of: "\'") == 2 || key.count(of: "\'") == 0)
+        // Too strict. We need to consider escaped quotation marks
+//        let quotationRule1 = (key.count(of: "\"") == 2 || key.count(of: "\"") == 0)
+//        let quotationRule2 = (key.count(of: "\'") == 2 || key.count(of: "\'") == 0)
         // 3. Quotation marks should match
         // check the first and the last element of the keys and values
         let quotationRule3 = key.trimmingCharacters(in: .whitespacesAndNewlines).first == key.trimmingCharacters(in: .whitespacesAndNewlines).last
         let quotationRule4 = value.trimmingCharacters(in: .whitespacesAndNewlines).first! == value[value.index(value.startIndex, offsetBy: value.count - 2)]
         
-        return correctEnding && quotationRule1 && quotationRule2 && quotationRule3 && quotationRule4
+        return correctEnding && quotationRule3 && quotationRule4
     }
 }
