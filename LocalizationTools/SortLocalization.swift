@@ -19,23 +19,15 @@ struct SortLocalization: ParsableCommand {
     
     func run() throws {
     
-        let contents = try String(contentsOfFile: inputFile)
-        let lines = contents.split(whereSeparator: \.isNewline)
-        var keyValues = [KeyValue]()
-        for (index, line) in lines.enumerated() {
-            let components = line.split(separator: "=")
-            guard components.count == 2 else {
-                throw NSError(domain: "SortLocalization", code: -10, userInfo: [NSLocalizedDescriptionKey: "\(inputFile) Invalid line at  \(index): \(line)"])
-            }
-            let keyValue = KeyValue(key: String(components[0]), value: String(components[1]))
-            guard keyValue.isValid() else {
-                throw NSError(domain: "SortLocalization", code: -10, userInfo: [NSLocalizedDescriptionKey: "\(inputFile) line \(index): \(line) is not valid!"])
-            }
-            keyValues.append(keyValue)
+        guard let dictionary = NSDictionary(contentsOf: URL(fileURLWithPath: inputFile)) as? [String: String] else {
+            throw NSError(domain: "SortLocalization", code: -10, userInfo: [NSLocalizedDescriptionKey: "Cannot parse file at \(inputFile)"])
         }
         
-        guard keyValues.isUnique else {
-            throw NSError(domain: "SortLocalization", code: -10, userInfo: [NSLocalizedDescriptionKey: "File \(inputFile)) has duplicate keys!"])
+        var keyValues = [KeyValue]()
+        for (key, value) in dictionary {
+            
+            let keyValue = KeyValue(key: key, value: value)
+            keyValues.append(keyValue)
         }
         
         let sorted = keyValues.sorted(by: { $0.key < $1.key })
@@ -52,22 +44,4 @@ struct SortLocalization: ParsableCommand {
 struct KeyValue: Hashable {
     var key: String
     var value: String
-    
-    func isValid() -> Bool {
-     
-        // Check rules here
-        // 1. Rule: Line should end with ;
-        let correctEnding = value.last == ";"
-        
-        // 2. Rule: There should be only two or zero quotation marks
-        // Too strict. We need to consider escaped quotation marks
-//        let quotationRule1 = (key.count(of: "\"") == 2 || key.count(of: "\"") == 0)
-//        let quotationRule2 = (key.count(of: "\'") == 2 || key.count(of: "\'") == 0)
-        // 3. Quotation marks should match
-        // check the first and the last element of the keys and values
-        let quotationRule3 = key.trimmingCharacters(in: .whitespacesAndNewlines).first == key.trimmingCharacters(in: .whitespacesAndNewlines).last
-        let quotationRule4 = value.trimmingCharacters(in: .whitespacesAndNewlines).first! == value[value.index(value.startIndex, offsetBy: value.count - 2)]
-        
-        return correctEnding && quotationRule3 && quotationRule4
-    }
 }
