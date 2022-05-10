@@ -6,6 +6,15 @@
 //
 
 import Foundation
+import ArgumentParser
 
-print("Hello, World!")
+DefaultCommand.main()
 
+struct DefaultCommand: ParsableCommand {
+    
+    static let configuration = CommandConfiguration(
+        abstract: "CLI Tool",
+        subcommands: [SortLocalization.self])
+    
+    init() { }
+}
